@@ -1,0 +1,3 @@
+how to manage the coordinates of the line? Coordinates are needed to
+initialise line loc. Then x is updated based on movement. Need a custom hook
+for managing movement (x)?
