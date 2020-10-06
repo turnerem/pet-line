@@ -18,6 +18,10 @@ export class Pet {
     return hunger
   }
 
+  incrementHunger(increment) {
+    this.hunger += increment
+  }
+
   get energy() {
     const timeSinceNap = this.timeSince( 'lastNap' )
     return 1000 - ( timeSinceNap + this.countPlay * 10 );

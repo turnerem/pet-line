@@ -9,46 +9,37 @@ export const petState = {
   average: {
     slope: -9,
     shade: "#FFD700",
-    headLoc: {
-      x1: 50, y1: 30
-    }, 
+    feetLocX: 190,
     leanDir: 'left'
   },
   alert: {
-    slope: null,
+    slope: -100,
     shade: "#F0FF36",
-    headLoc: {
-      x1: 50, y1: 20
-    }, 
+    feetLocX: 190,
     leanDir: 'left'
   },
   bored: {
     slope: -2,
     shade: "#FFD700",
-    headLoc: {
-      x1: 50, y1: 50
-    }, 
+    feetLocX: 190,
     leanDir: 'left'
   },
   tired: {
     slope: -1.5,
     shade: "#7DACD7",
-    headLoc: {
-      x1: 50, y1: 80
-    }, 
+    feetLocX: 200,
     leanDir: 'left'
   },
   asleep: {
     slope: -0.2,
     shade: "#C54287",
-    headLoc: {
-      x1: 10, y1: 200
-    }, 
+    feetLocX: 300,
     leanDir: 'left'
   },
   annoyed: {
-    slope: -3,
+    slope: 3,
     shade: "#2B2623",
+    feetLocX: 30,
     headLoc: {
       x1: 450, y1: 40
     }, 
