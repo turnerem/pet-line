@@ -59,7 +59,10 @@ function App() {
               <feTurbulence type="fractalNoise" baseFrequency="0.06" numOctaves="2" result="warp"></feTurbulence>
               <feDisplacementMap xChannelSelector="A" scale="15" in="SourceGraphic" in2="warp" />
             </filter>
-
+            <filter id="tickle">
+              <feTurbulence type="fractalNoise" baseFrequency="0.00001 0.00001" numOctaves="1" result="warp"></feTurbulence>
+              <feDisplacementMap xChannelSelector="R" yChannelSelector="G" scale="60" in="SourceGraphic" in2="warpOffset" />
+            </filter>
           </defs>
 
           <Line
