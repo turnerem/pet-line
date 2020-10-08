@@ -1,4 +1,3 @@
-import { moveToFood } from "./petActions";
 
 export const calcHeadLoc = ( feetLoc, petTallness, slope ) => {
   // find feet of pet line given head loc (relative to ground), line length, and lean (left/right)
@@ -6,10 +5,10 @@ export const calcHeadLoc = ( feetLoc, petTallness, slope ) => {
     const { x2, y2 } = feetLoc;
     // height of head off ground
 
-    const y1 = y2 - petTallness / Math.sqrt( 1 / (1 + Math.pow(slope, 2)) )
+    const y1 = y2 + petTallness * slope / Math.sqrt( 1 + Math.pow(slope, 2) )
 
     const x1 = (y1 - y2) / slope + x2;
-    
+    console.log('headLoc: x1', x1, 'y1', y1)
     return {x1, y1}
   }
   

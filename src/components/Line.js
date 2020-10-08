@@ -1,12 +1,11 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 import { petState } from '../data/petState';
-import { calcHeadLoc, getLineCoordinates } from '../utils/mathUtils'
+import { calcHeadLoc } from '../utils/mathUtils'
 import { Pet } from '../petObj'
-// import gsap from 'gsap';
-import { moveToFood } from '../utils/petActions';
+import gsap from 'gsap';
+import { moveToFood, eat } from '../utils/petActions';
 
 const pet = new Pet();
-
 
 
 // function useMovement ( initialDistance, x, svgWidth ) {
@@ -41,16 +40,17 @@ const pet = new Pet();
 
 // how to change coordinates when mood changes, 
 // and also periodically trigger footsteps?
-const useCoordinatesManager = ( svgDims, initialPetState = petState[pet.petState] ) => {
+const useCoordinatesManager = ( svgDims, foodUnits, setFoodUnits, initialPetState = petState[pet.petState] ) => {
 
   const petTallness = svgDims.height * .9;
-  const initialDistance = svgDims.width * .1;
+  const initialStepMvmt = svgDims.width * .1;
   
   // swap around: find head loc from feet
   const { feetLocX, slope } = initialPetState;
 
   const feetLoc = {x2: feetLocX, y2: svgDims.height - 5}
 
+  // this is recalculating at every interval. Make custom hook and only recalculate when pet changes direction
   const headLoc = calcHeadLoc( feetLoc, petTallness, slope, svgDims)
 
   const yCoords = { y1: headLoc.y1, y2: feetLoc.y2 }
@@ -58,64 +58,124 @@ const useCoordinatesManager = ( svgDims, initialPetState = petState[pet.petState
   // this needs to set head and foot x coords of new loc
   const [ xCoords, setXCoords ] = useState({ x1: headLoc.x1, x2: feetLoc.x2 })
     
-  //const coordinates = getLineCoordinates( headLoc, feetLoc )
+  const [ stepMvmt, setStepMvmt ] = useState(initialStepMvmt)
         
+  const [ petting, setPetting ] = useState( false )
+
+//   pet state alert hunger: 9.11
+// petObj.js:22 Uncaught TypeError: Cannot set property hunger of #<Pet> which has only a getter
+//     at Pet.incrementHunger (petObj.js:22)
+//     at Line.js:72
+
     useEffect(() => {
       const moveId = setInterval(() => {
-        if (pet.hunger > 1 ) {
-          moveToFood( xCoords, setXCoords, 400, 90 );
+        // improve these line with a boolean that says whether moveToFood is required - so moveToFood is not calculated each time here.
+        if( !petting ) {
+          if (pet.hunger > 3 ) {
+            console.log('hungry now')
+            if( !moveToFood( xCoords, setXCoords, 400, 90 ) ){
+              // if already at bowl, then eat
+  
+              if (eat(foodUnits, setFoodUnits)) {
+                pet.incrementHunger(-1)
+                pet.resetTimeSince( 'lastMeal' )
+                // pet.
+              } else {
+                pet.incrementHunger(8)
+              }
+            }
+          } else {
+            if( redirectNextMove( stepMvmt, xCoords.x2, svgDims.width ) ){
+              takeUnrealStep( stepMvmt * -1, xCoords, setXCoords )
+              setStepMvmt( stepMvmt * -1 )
+            } else {
+              takeUnrealStep( stepMvmt, xCoords, setXCoords )
+            }
+          }
         } else {
-          let distance = calcNextMove( initialDistance, xCoords.x2, svgDims.width )
-          takeUnrealStep( distance, xCoords, setXCoords )
+          console.log( 'petting! ')
         }
-    }, 5000 );
+    }, 1800 * (1 + 3 * Math.random() ) );
 
     return () => clearInterval( moveId );
 
   })
 
-  return { xCoords, yCoords }
+  return { xCoords, yCoords, setPetting }
 }
 
-const takeUnrealStep = (distance, xCoords, setXCoords) => {
-  setXCoords( { x1: xCoords.x1 + distance, x2: xCoords.x2 + distance } )
+const takeUnrealStep = (stepMvmt, xCoords, setXCoords) => {
+  setXCoords( { x1: xCoords.x1 + stepMvmt, x2: xCoords.x2 + stepMvmt } )
 }
 
 // const takeStep = (duration, distance) => {
 //   TweenLite.to("#pet-line", duration, {x: distance})
 // }
 
-const calcNextMove = (distance, x, svgWidth) => {
-  const distToRightEdge = svgWidth - x;
-  const gettingTooCloseToRight = distance > 0 && distToRightEdge < distance;
-  const gettingTooCloseToLeft = distance < 0 && x + distance < 0;
+// return true if time to change direction
+const redirectNextMove = (stepMvmt, x, svgWidth) => {
+  let distToRightEdge = svgWidth - x;
+  let gettingTooCloseToRight = stepMvmt > 0 && distToRightEdge < stepMvmt;
+  let gettingTooCloseToLeft = stepMvmt < 0 && x + stepMvmt < 0;
 
   if ( gettingTooCloseToRight || gettingTooCloseToLeft ) { 
-      return distance * -1;
+    return true
+  } 
+  return false
+}
+
+const pettingLine = ( setPetting, turb ) => {
+
+  setPetting( true )
+
+  console.log('the turb', turb)
+
+  const turbVal = { val: 0.000001 }
+
+  const tl = gsap.timeline({ paused: true, onUpdate: 
+    function() {
+      turb.setAttribute('baseFrequency', '0 ' + turbVal.val);
     } 
-      
-  return distance
+  });
+
+  tl.to(turbVal, { duration: 0.2, val: 0.3 });
+  tl.to(turbVal, { duration: 0.2, val: 0.000001 });
+
+  tl.restart()
 
 }
 
 
-const Line = ({ svgDims }) => {
+const Line = ({ svgDims, foodUnits, setFoodUnits }) => {
 
-  const { xCoords, yCoords } = useCoordinatesManager( svgDims )
+  const { xCoords, yCoords, setPetting } = useCoordinatesManager( svgDims, foodUnits, setFoodUnits )
+
+  // const petRef = useRef(null)
 
   const { shade } = petState[pet.petState];
 
-  console.log( 'pet state', pet.petState, 'hunger:', pet.hunger )
+  const turb = document.querySelector('#tickle');
 
+  console.log('the turb in Line', turb)
 
   return (
-    <line 
-      id='pet-line'
-      x1={xCoords.x1} 
-      y1={yCoords.y1}  
-      x2={xCoords.x2}  
-      y2={yCoords.y2}  
-      style={{stroke: shade, strokeWidth: 4}} />
+    <>
+      <filter id="tickle">
+        <feTurbulence type="fractalNoise" baseFrequency="0.00001 0.00001" numOctaves="1" result="warp"></feTurbulence>
+        <feDisplacementMap xChannelSelector="R" yChannelSelector="G" scale="30" in="SourceGraphic" in2="warpOffset" />
+      </filter>
+      <line 
+        id='pet-line'
+        x1={xCoords.x1} 
+        y1={yCoords.y1}  
+        x2={xCoords.x2}  
+        y2={yCoords.y2}  
+        style={{stroke: shade, strokeWidth: 4}} 
+        filter='url(#tickle)'
+        onMouseEnter={() => { pettingLine( setPetting, turb ) }}
+        onMouseLeave={() => { setPetting( false ) }}
+      />
+    </>
   )
 }
 

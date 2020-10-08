@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import './App.css';
 import Header from "./components/Header"
 import Line from "./components/Line"
@@ -46,6 +46,10 @@ function App() {
     //takeStep(2, 100);
     //useMovement( 50, feetLoc.x2, svgDims.width )
 
+
+    // alternative to this, if it's causing extra rerendering, is to have a food bowl data manager
+    const [ foodUnits, setFoodUnits ] = useState(9)
+
     return (
       <div className="App">
         <Header />
@@ -55,15 +59,20 @@ function App() {
               <feTurbulence type="fractalNoise" baseFrequency="0.06" numOctaves="2" result="warp"></feTurbulence>
               <feDisplacementMap xChannelSelector="A" scale="15" in="SourceGraphic" in2="warp" />
             </filter>
+
           </defs>
 
           <Line
             svgDims={svgDims}
+            foodUnits={foodUnits}
+            setFoodUnits={setFoodUnits}
           />
           <Ground svgDims={svgDims} />
           <FoodBowl 
             filter={"feDisplace"}
             // foodBowlDims={foodBowlDims}
+            foodUnits={foodUnits}
+            setFoodUnits={setFoodUnits}
             svgDims={svgDims}
           />
         </svg>

@@ -1,14 +1,15 @@
 
-// export const eat = () => {
-//   if( foodUnits > 0 ) {
-//     setFoodUnits( foodUnits - 1 )
-//     // where to trigger moods? Moods are triggered by health stats
-//   } else {
-//     pet.incrementHunger(20)
-//   }
-// }
+// returns true if eating was success
+export const eat = (foodUnits, setFoodUnits) => {
+  if( foodUnits > 0 ) {
+    setFoodUnits( foodUnits - 1 )
+    // where to trigger moods? Moods are triggered by health stats
+    return true
+  } 
+  return false
+}
 
-// This functionshould JUST do the moving. Another function should check whether move is necessary
+// return true if moving, return false if already there
 export const moveToFood = (xCoords, setXCoords, foodBowlLocX, foodBowlWidth ) => {
   const distLeft = foodBowlLocX - xCoords.x2;
   const distRight = distLeft + foodBowlWidth;

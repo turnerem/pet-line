@@ -2,7 +2,7 @@ import React from 'react';
 import FoodUnit from "./FoodUnit"
 
 
-const FoodBowl = ({ filter, svgDims }) => {
+const FoodBowl = ({ filter, foodUnits, setFoodUnits, svgDims }) => {
   const foodBowlDims = {
     height: 20,
     width: 90,
@@ -34,13 +34,15 @@ const FoodBowl = ({ filter, svgDims }) => {
     <>
       <polygon
         points={foodBowlCoordinates(foodBowlDims.height, foodBowlDims.width, foodBowlDims.baseWidth, foodBowlDims.leftCornerX, svgDims)}
-        fill='#65350F'
+        fill='#765648'
         filter={`url(#${filter})`}
+        onClick={() => { setFoodUnits( 9 ) }}
       />
       <FoodUnit 
         bowlWidth={foodBowlDims.width}
         bowlLeftCornerX={foodBowlDims.leftCornerX}
         bowlSvgTop={svgDims.height - foodBowlDims.height}
+        foodUnits={foodUnits}
       />
     </>
   )

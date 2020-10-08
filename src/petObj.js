@@ -6,21 +6,36 @@ export class Pet {
     this.lastNap = Date.now()
     this.lastStateChange = Date.now()
     this.countPlay = 0;
+    this.baselineHunger = 0;
 //    this.petState = "average"
 //    this.anger = 0;
     console.log("Pet is born")
   }
-  
-  get hunger() {
-    const timeSinceMeal = this.timeSince( 'lastMeal' )
-    const hunger = (10 * timeSinceMeal + timeSinceMeal ^ 2) / 1000;
-    
-    return hunger
+
+  get baselineHunger() {
+    return this._baselineHunger
+  }
+
+  set baselineHunger(hunger) {
+    this._baselineHunger = hunger
   }
 
   incrementHunger(increment) {
-    this.hunger += increment
+    const newBaseline = this._baselineHunger + increment;
+    this._baselineHunger = ( newBaseline < 0 ? 0 : newBaseline )
   }
+  
+  get hunger() {
+    const timeSinceMeal = this.timeSince( 'lastMeal' )
+    const hunger = (10 * timeSinceMeal + timeSinceMeal ^ 2) / 100;
+    
+    // console.log( 'time since meal:', timeSinceMeal, 'baseline hunger:', this.baselineHunger, 'time-dependent hunger', hunger)
+    return this.baselineHunger + (hunger < 0 ? 0 : hunger)
+  }
+
+  // incrementHunger(increment) {
+  //   this.hunger += increment
+  // }
 
   get energy() {
     const timeSinceNap = this.timeSince( 'lastNap' )
@@ -73,9 +88,13 @@ export class Pet {
   //   return this.petState
   // }
 
+  resetTimeSince( activity ) {
+    this[ activity ] = Date.now()
+  }
+
   timeSince( activity ) {
     let secondsSinceLast = ( Date.now() - this[ activity ] ) / 6000;
-    return secondsSinceLast.toFixed(0);
+    return Math.round(secondsSinceLast * 100) / 100;
   }
 
 }
