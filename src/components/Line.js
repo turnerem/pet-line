@@ -124,11 +124,30 @@ const redirectNextMove = (stepMvmt, x, svgWidth) => {
   return false
 }
 
-const pettingLine = ( setPetting, turb ) => {
+const pettingLine = ( setPetting, tl ) => {
 
   setPetting( true )
 
-  console.log('the turb', turb)
+  // console.log('the turb', turb)
+
+
+  // tl.to(turbVal, { duration: 0.2, val: 0.000001 });
+
+  tl.restart()
+
+}
+
+
+// check App is loaded before defining tl
+const Line = ({ svgDims, foodUnits, setFoodUnits }) => {
+
+  const { xCoords, yCoords, setPetting } = useCoordinatesManager( svgDims, foodUnits, setFoodUnits )
+
+  // const petRef = useRef(null)
+
+  const { shade } = petState[pet.petState];
+
+  const turb = document.querySelector('#tickle feTurbulence');
 
   const turbVal = { val: 0.000001 }
 
@@ -138,44 +157,26 @@ const pettingLine = ( setPetting, turb ) => {
     } 
   });
 
-  tl.to(turbVal, { duration: 0.2, val: 0.3 });
-  tl.to(turbVal, { duration: 0.2, val: 0.000001 });
-
-  tl.restart()
-
-}
-
-
-const Line = ({ svgDims, foodUnits, setFoodUnits }) => {
-
-  const { xCoords, yCoords, setPetting } = useCoordinatesManager( svgDims, foodUnits, setFoodUnits )
-
-  // const petRef = useRef(null)
-
-  const { shade } = petState[pet.petState];
-
-  const turb = document.querySelector('#tickle');
+  tl.to(turbVal, { duration: 0.5, val: 0.063 });
+  tl.to(turbVal, { duration: 0.5, val: 0.000001 });
 
   console.log('the turb in Line', turb)
 
+  // put line on rect and adjust the rect for line diagonality
+  // then put the filter on the rectangle
   return (
-    <>
-      <filter id="tickle">
-        <feTurbulence type="fractalNoise" baseFrequency="0.00001 0.00001" numOctaves="1" result="warp"></feTurbulence>
-        <feDisplacementMap xChannelSelector="R" yChannelSelector="G" scale="30" in="SourceGraphic" in2="warpOffset" />
-      </filter>
-      <line 
-        id='pet-line'
-        x1={xCoords.x1} 
-        y1={yCoords.y1}  
-        x2={xCoords.x2}  
-        y2={yCoords.y2}  
-        style={{stroke: shade, strokeWidth: 4}} 
-        filter='url(#tickle)'
-        onMouseEnter={() => { pettingLine( setPetting, turb ) }}
-        onMouseLeave={() => { setPetting( false ) }}
-      />
-    </>
+    <line 
+      id='pet-line'
+      x1={xCoords.x1} 
+      y1={yCoords.y1}  
+      x2={xCoords.x2}  
+      y2={yCoords.y2}  
+      style={{stroke: shade}} 
+      strokeWidth='8'
+      filter='url(#tickle)'
+      onMouseEnter={() => { pettingLine( setPetting, tl ) }}
+      onMouseLeave={() => { setPetting( false ) }}
+    />
   )
 }
 
