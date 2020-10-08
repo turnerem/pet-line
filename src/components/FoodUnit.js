@@ -39,7 +39,7 @@ const FoodUnit = ({ bowlWidth, bowlLeftCornerX, bowlSvgTop, foodUnits }) => {
           y={a.y}
           width={foodUnitWidth}
           height={foodUnitWidth}
-          fill='#3F3443'
+          fill='none'
           stroke='#FFFFF1'
         />
       )
