@@ -23,3 +23,7 @@ export const moveToFood = (xCoords, setXCoords, foodBowlLocX, foodBowlWidth ) =>
     // timeline.to("#pet-line", { duration: 1, x: destination - currentLocX })
   }
 }
+
+export const takeUnrealStep = (stepMvmt, xCoords, setXCoords) => {
+  setXCoords( { x1: xCoords.x1 + stepMvmt, x2: xCoords.x2 + stepMvmt } )
+}
