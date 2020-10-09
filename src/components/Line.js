@@ -1,9 +1,9 @@
 import React, {useState, useEffect, useRef} from 'react';
 import { petState } from '../data/petState';
-import { calcHeadLoc } from '../utils/mathUtils'
+import { calcHeadLoc, calcRect } from '../utils/mathUtils'
 import { Pet } from '../petObj'
 import gsap from 'gsap';
-import { moveToFood, eat } from '../utils/petActions';
+import { moveToFood, eat, takeUnrealStep } from '../utils/petActions';
 
 const pet = new Pet();
 
@@ -42,25 +42,28 @@ const pet = new Pet();
 // and also periodically trigger footsteps?
 const useCoordinatesManager = ( svgDims, foodUnits, setFoodUnits, initialPetState = petState[pet.petState] ) => {
 
-  const petTallness = svgDims.height * .9;
-  const initialStepMvmt = svgDims.width * .1;
-  
-  // swap around: find head loc from feet
-  const { feetLocX, slope } = initialPetState;
+  const [ stepMvmt, setStepMvmt ] = useState(svgDims.width * .1)
+        
+  const [ petting, setPetting ] = useState( false )
 
+
+  const petTallness = svgDims.height * .9;  
+
+  const { feetLocX, slope } = initialPetState;
   const feetLoc = {x2: feetLocX, y2: svgDims.height - 5}
 
+  // const [ slopeFlip, setSlopeFlip ] = useState( stepMvmt < 0 ?)
   // this is recalculating at every interval. Make custom hook and only recalculate when pet changes direction
   const headLoc = calcHeadLoc( feetLoc, petTallness, slope, svgDims)
 
+  
   const yCoords = { y1: headLoc.y1, y2: feetLoc.y2 }
-
+  
   // this needs to set head and foot x coords of new loc
   const [ xCoords, setXCoords ] = useState({ x1: headLoc.x1, x2: feetLoc.x2 })
-    
-  const [ stepMvmt, setStepMvmt ] = useState(initialStepMvmt)
-        
-  const [ petting, setPetting ] = useState( false )
+  
+  const rectCoords = calcRect( xCoords, yCoords )
+
 
 //   pet state alert hunger: 9.11
 // petObj.js:22 Uncaught TypeError: Cannot set property hunger of #<Pet> which has only a getter
@@ -86,11 +89,9 @@ const useCoordinatesManager = ( svgDims, foodUnits, setFoodUnits, initialPetStat
             }
           } else {
             if( redirectNextMove( stepMvmt, xCoords.x2, svgDims.width ) ){
-              takeUnrealStep( stepMvmt * -1, xCoords, setXCoords )
               setStepMvmt( stepMvmt * -1 )
-            } else {
-              takeUnrealStep( stepMvmt, xCoords, setXCoords )
             }
+            takeUnrealStep( stepMvmt, xCoords, setXCoords )
           }
         } else {
           console.log( 'petting! ')
@@ -101,12 +102,10 @@ const useCoordinatesManager = ( svgDims, foodUnits, setFoodUnits, initialPetStat
 
   })
 
-  return { xCoords, yCoords, setPetting }
+  return { xCoords, yCoords, rectCoords, setPetting }
 }
 
-const takeUnrealStep = (stepMvmt, xCoords, setXCoords) => {
-  setXCoords( { x1: xCoords.x1 + stepMvmt, x2: xCoords.x2 + stepMvmt } )
-}
+
 
 // const takeStep = (duration, distance) => {
 //   TweenLite.to("#pet-line", duration, {x: distance})
@@ -115,8 +114,8 @@ const takeUnrealStep = (stepMvmt, xCoords, setXCoords) => {
 // return true if time to change direction
 const redirectNextMove = (stepMvmt, x, svgWidth) => {
   let distToRightEdge = svgWidth - x;
-  let gettingTooCloseToRight = stepMvmt > 0 && distToRightEdge < stepMvmt;
-  let gettingTooCloseToLeft = stepMvmt < 0 && x + stepMvmt < 0;
+  let gettingTooCloseToRight = stepMvmt > 0 && distToRightEdge < stepMvmt * 2;
+  let gettingTooCloseToLeft = stepMvmt < 0 && x + stepMvmt * 2 < 0;
 
   if ( gettingTooCloseToRight || gettingTooCloseToLeft ) { 
     return true
@@ -141,7 +140,7 @@ const pettingLine = ( setPetting, tl ) => {
 // check App is loaded before defining tl
 const Line = ({ svgDims, foodUnits, setFoodUnits }) => {
 
-  const { xCoords, yCoords, setPetting } = useCoordinatesManager( svgDims, foodUnits, setFoodUnits )
+  const { xCoords, yCoords, rectCoords, setPetting } = useCoordinatesManager( svgDims, foodUnits, setFoodUnits )
 
   // const petRef = useRef(null)
 
@@ -165,18 +164,25 @@ const Line = ({ svgDims, foodUnits, setFoodUnits }) => {
   // put line on rect and adjust the rect for line diagonality
   // then put the filter on the rectangle
   return (
-    <line 
-      id='pet-line'
-      x1={xCoords.x1} 
-      y1={yCoords.y1}  
-      x2={xCoords.x2}  
-      y2={yCoords.y2}  
-      style={{stroke: shade}} 
-      strokeWidth='8'
-      filter='url(#tickle)'
-      onMouseEnter={() => { pettingLine( setPetting, tl ) }}
-      onMouseLeave={() => { setPetting( false ) }}
-    />
+    <>
+      <rect
+        id='pet-line'
+        {...rectCoords}
+        transform='rotate(20)'
+        style={{stroke: shade, fill: shade}} 
+        filter='url(#tickle)'
+        onMouseEnter={() => { pettingLine( setPetting, tl ) }}
+        onMouseLeave={() => { setPetting( false ) }}
+        />
+      <line 
+        id='pet-line'
+        x1={xCoords.x1} 
+        y1={yCoords.y1}  
+        x2={xCoords.x2}  
+        y2={yCoords.y2}  
+        strokeWidth='8'
+        />
+    </>
   )
 }
 

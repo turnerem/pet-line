@@ -11,6 +11,28 @@ export const calcHeadLoc = ( feetLoc, petTallness, slope ) => {
     console.log('headLoc: x1', x1, 'y1', y1)
     return {x1, y1}
   }
+
+export const calcRect = ( xCoords, yCoords ) => {
+  const personalSpace = 50;
+  let padding = 10;
+
+  const { x1, x2 } = xCoords;
+
+  const { y1, y2 } = yCoords;
+
+  const rectHeight = y2 - y1;
+  let rectWidth = Math.abs( x2 - x1 );
+  padding = ( rectWidth < personalSpace ) && personalSpace / 2;
+
+  rectWidth += padding * 2;
+
+  const leftLean = ( x2 > x1 ) ? true : false;
+
+  let rectX1 = ( leftLean ) ? x1 : x2;
+  rectX1 -= padding;
+
+  return { x: rectX1, width: rectWidth, y: y1, height: rectHeight }
+}
   
 export const getLineCoordinates = ( headLoc, feetLoc ) => {
     return { ...headLoc, ...feetLoc }
