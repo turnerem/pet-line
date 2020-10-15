@@ -7,16 +7,18 @@
     "@testing-library/react": "^9.5.0",
     "@testing-library/user-event": "^7.2.1",
     "@types/prop-types": "^15.7.3",
+    "babel-jest": "^26.5.2",
     "gsap": "^3.5.1",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "react-scripts": "3.4.3",
+    "svelte-jester": "^1.1.5",
     "typescript": "^2.8.4"
   },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
-    "test": "react-scripts test",
+    "test": "jest",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {
@@ -32,6 +34,31 @@
       "last 1 chrome version",
       "last 1 firefox version",
       "last 1 safari version"
+    ]
+  },
+  "devDependencies": {
+    "jest": "^26.5.3"
+  },
+  "jest": {
+    "transform": {
+      "^.+\\.js$": "babel-jest",
+      "^.+\\.mjs$": "babel-jest",
+      "^.+\\.svelte$": "svelte-jester"
+    },
+    "transformIgnorePatterns": [
+      "src/node_modules/(?!@sapper)"
+    ],
+    "moduleFileExtensions": [
+      "js",
+      "mjs",
+      "svelte"
+    ],
+    "moduleDirectories": [
+      "node_modules",
+      "src/node_modules"
+    ],
+    "setupFilesAfterEnv": [
+      "@testing-library/jest-dom/extend-expect"
     ]
   }
 }
