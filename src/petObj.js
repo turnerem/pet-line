@@ -9,7 +9,7 @@ export class Pet {
     this.baselineHunger = 0;
 //    this.petState = "average"
 //    this.anger = 0;
-    console.log("Pet is born")
+    // console.log("Pet is born")
   }
 
   get baselineHunger() {

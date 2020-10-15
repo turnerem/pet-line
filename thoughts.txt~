@@ -1,3 +1,16 @@
+TODO, ordered by nextness
+- put line on rect. Make rect move and add filter to it. Flip slop of line
+  when direction changes
+- add buttons to increase/decreasae hunger, energy, etc. For testing.
+- think of mood updater given owner action. This could be a switch on owner
+  action. This is probably preferable: having all owner-influenced mood
+  updating in just one function
+  - ditto for mood updating given want X
+
 how to manage the coordinates of the line? Coordinates are needed to
 initialise line loc. Then x is updated based on movement. Need a custom hook
 for managing movement (x)?
+
+Some variables are required everywhere: svgDims, pet characteristics, pet loc,
+foodbowl loc, foodbowl dims
+
