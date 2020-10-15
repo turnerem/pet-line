@@ -132,7 +132,10 @@ const pettingLine = ( setPetting, tl ) => {
 
   // tl.to(turbVal, { duration: 0.2, val: 0.000001 });
 
-  tl.restart()
+  if( tl ) {
+    tl.restart()
+
+  }
 
 }
 
@@ -146,20 +149,25 @@ const Line = ({ svgDims, foodUnits, setFoodUnits }) => {
 
   const { shade } = petState[pet.petState];
 
+  let tl = undefined;
+
   const turb = document.querySelector('#tickle feTurbulence');
 
   const turbVal = { val: 0.000001 }
 
-  const tl = gsap.timeline({ paused: true, onUpdate: 
-    function() {
-      turb.setAttribute('baseFrequency', '0 ' + turbVal.val);
-    } 
-  });
+  if( turb ) {
+    tl = gsap.timeline({ paused: true, onUpdate: 
+      function() {
+        turb.setAttribute('baseFrequency', '0 ' + turbVal.val);
+      } 
+    });
+  
+    tl.to(turbVal, { duration: 0.5, val: 0.063 });
+    tl.to(turbVal, { duration: 0.5, val: 0.000001 });
 
-  tl.to(turbVal, { duration: 0.5, val: 0.063 });
-  tl.to(turbVal, { duration: 0.5, val: 0.000001 });
+  }
 
-  console.log('the turb in Line', turb)
+  // console.log('the turb in Line', turb)
 
   // put line on rect and adjust the rect for line diagonality
   // then put the filter on the rectangle
@@ -167,21 +175,23 @@ const Line = ({ svgDims, foodUnits, setFoodUnits }) => {
     <>
       <rect
         id='pet-line'
+        // id='pet-personal-space'
         {...rectCoords}
-        transform='rotate(20)'
-        style={{stroke: shade, fill: shade}} 
+        transform='skewX(2)'
+        style={{stroke: shade, fill: shade}}
         filter='url(#tickle)'
         onMouseEnter={() => { pettingLine( setPetting, tl ) }}
         onMouseLeave={() => { setPetting( false ) }}
         />
-      <line 
-        id='pet-line'
+      {/* <line 
         x1={xCoords.x1} 
         y1={yCoords.y1}  
         x2={xCoords.x2}  
         y2={yCoords.y2}  
+        style={{stroke: shade}} 
         strokeWidth='8'
-        />
+        filter='url(#tickle)'
+        /> */}
     </>
   )
 }

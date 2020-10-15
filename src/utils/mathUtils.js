@@ -13,7 +13,7 @@ export const calcHeadLoc = ( feetLoc, petTallness, slope ) => {
   }
 
 export const calcRect = ( xCoords, yCoords ) => {
-  const personalSpace = 50;
+  // const personalSpace = 50;
   let padding = 10;
 
   const { x1, x2 } = xCoords;
@@ -22,9 +22,9 @@ export const calcRect = ( xCoords, yCoords ) => {
 
   const rectHeight = y2 - y1;
   let rectWidth = Math.abs( x2 - x1 );
-  padding = ( rectWidth < personalSpace ) && personalSpace / 2;
+  // padding = ( rectWidth < personalSpace ) && personalSpace / 2;
 
-  rectWidth += padding * 2;
+  rectWidth += padding;
 
   const leftLean = ( x2 > x1 ) ? true : false;
 

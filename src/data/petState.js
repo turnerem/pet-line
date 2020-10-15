@@ -1,9 +1,14 @@
+// rename file as petStateData
+
 // export const shade = {
 //   alert: "#F0FF36",
 //   lazy: "#FFD700",
 //   asleep: "#AFF5E9",
 //   annoyed: "#2B2623"
 // }
+
+// watching tv, getting tickled, getting thrown, sleeping, napping, eating,
+// daydreaming
 
 export const petState = {
   average: {
