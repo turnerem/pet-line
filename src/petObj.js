@@ -60,12 +60,10 @@ class Pet {
     const hunger = 20 - fullness
 
     // cache value for quick checking
-    console.log('setting new hungerLev?', hunger, 'fullness', fullness)
-    this._hungerLev = hunger;
+    this.hungerLev = hunger;
     this.hungerLastRecalc = Date.now();
 
-    // max hunger is 100 so to get a number between 0 and 1:
-    return ( hunger > 0 ) ? ( hunger * 5 / 100 ) : 0
+    return ( hunger > 0 ) ? hunger : 0
   }
 
   get isHungry() {
@@ -73,14 +71,19 @@ class Pet {
   }
 
   // before calling this action, check there's food
-  eat() {
-    // TODO: Pet.eat(): change pet state to 'eating' and change back to previous state after 5 seconds
-    
-    this.recentMealTimes.unshift( Date.now() )
+  eat( foodBowl ) {    
+    if( foodBowl.foodUnits > 0 ) {
+      this.recentMealTimes.unshift( Date.now() )
 
-    // tidy up recentMealTimes array if it's getting too long
-    if( this.recentMealTimes.length > 20 ) {
-      this.recentMealTimes.slice( 0, 20 );
+      foodBowl.foodUnits --
+  
+      // tidy up recentMealTimes array if it's getting too long
+      while( this.recentMealTimes.length > 20 ) {
+        this.recentMealTimes.pop();
+      }
+    } else {
+      // if there's no food, shift the latest meal time, because sheer annoyance of pet has ratched up the hunger
+      this.recentMealTimes.shift();
     }
   }
 

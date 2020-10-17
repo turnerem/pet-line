@@ -6,9 +6,9 @@ const flff = new Pet();
 
 // testing hunger
 describe('Pet Hunger', () => {
-  test('hunger less than 9 when born', () => {
-    expect(flff.hunger).toBeLessThan( 9 )
-  })
+  // test('hunger less than 9 when born', () => {
+  //   expect(flff.hunger).toBeLessThan( 9 )
+  // })
   test('hunger to be 8 when born', () => {
     expect( flff.hunger ).toBe( 8 )
   })
@@ -24,10 +24,33 @@ describe('Pet Hunger', () => {
 
     const newHunger = flff.hunger;
 
-    console.log( 'hungerLev', flff.hungerLev, 'newHunger', newHunger )
-    console.log( 'hungerLev again', flff.hungerLev )
-
     expect( newHunger ).not.toBe( 20 );
     expect( newHunger ).toBe( flff.hungerLev )
+  })
+  test('pet.isHungry returns true if hunger is > 10', () => {
+    flff.hungerLastRecalc = Date.now();
+    flff.hungerLev = 10;
+
+    expect( flff.isHungry ).toBe( false );
+    
+    flff.hungerLev = 11;
+
+    expect( flff.isHungry ).toBe( true )
+   
+  })
+})
+
+describe('Pet eating', () => {
+  test('before first meal, recentMealTimes array should be of length 12', () => {
+    expect( flff.recentMealTimes.length ).toBe( 12 )
+  })
+  test('recentMealTimes array should never have more than 20 elements', () => {
+    const foodBowl = { foodUnits: 12 };
+
+    for( let i = 0; i < 10; i++ ) {
+      flff.eat( foodBowl );
+    }
+    expect( flff.recentMealTimes.length ).toBe( 20 )
+    expect( foodBowl.foodUnits ).toBe( 2)
   })
 })
