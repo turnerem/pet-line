@@ -1,50 +1,90 @@
-const timeUntilNapReady = 180000;
+// Pet object does not deal with pet location or movement
 
-export class Pet {
+const timeUntilNapReady = 1000 * 60 * 10;
+
+
+
+const millisToMins = ( milliseconds, round = 0 ) => {
+  const mins = milliseconds / ( 1000 * 60 )
+  
+  if( round === 0 ) {
+    return Math.round( mins )
+  }
+  
+  const rounder = Math.pow( 10, round )
+  
+  return Math.round( mins * rounder ) / rounder
+}
+
+
+class Pet {
   constructor() {
-    this.lastMeal = Date.now()
+    this.state = "newborn"
     this.lastNap = Date.now()
     this.lastStateChange = Date.now()
-    this.countPlay = 0;
-    this.baselineHunger = 0;
-//    this.petState = "average"
-//    this.anger = 0;
+
+    // feeding
+    this.recentMealTimes = Array(12).fill( Date.now() )
+    this.hungerLastRecalc = 0;
+    this.hungerLev = 0;
+
     // console.log("Pet is born")
   }
 
-  get baselineHunger() {
-    return this._baselineHunger
+  set hunger( hungerLevel ) {
+    this.hungerLev = hungerLevel
   }
 
-  set baselineHunger(hunger) {
-    this._baselineHunger = hunger
-  }
-
-  incrementHunger(increment) {
-    const newBaseline = this._baselineHunger + increment;
-    this._baselineHunger = ( newBaseline < 0 ? 0 : newBaseline )
-  }
-  
   get hunger() {
-    const timeSinceMeal = this.timeSince( 'lastMeal' )
-    const hunger = (10 * timeSinceMeal + timeSinceMeal ^ 2) / 100;
+    if( Date.now() - this.hungerLastRecalc < 5 * 60 * 1000 ) {
+      return this.hungerLev
+    }
+
+    const fullnessArr = this.recentMealTimes.map( a => {
+      const minsSince = millisToMins( Date.now() - a )
+      // effectiveness of recent meals:
+      // quantity eaten * fraction that reduces linearly over 4 hours
+      return ( ( 4 * 60 ) - minsSince ) / ( 4 * 60 )
+    })
     
-    // console.log( 'time since meal:', timeSinceMeal, 'baseline hunger:', this.baselineHunger, 'time-dependent hunger', hunger)
-    return this.baselineHunger + (hunger < 0 ? 0 : hunger)
+    fullnessArr.filter( b => {
+      return b > 0
+    })
+    
+    const fullness = ( fullnessArr.length > 0 ) ? 
+      fullnessArr.reduce( ( tot, b ) => {
+        return tot + b
+      }) 
+      : 0
+
+    const hunger = 20 - fullness
+
+    // cache value for quick checking
+    console.log('setting new hungerLev?', hunger, 'fullness', fullness)
+    this._hungerLev = hunger;
+    this.hungerLastRecalc = Date.now();
+
+    // max hunger is 100 so to get a number between 0 and 1:
+    return ( hunger > 0 ) ? ( hunger * 5 / 100 ) : 0
   }
 
-  // incrementHunger(increment) {
-  //   this.hunger += increment
-  // }
-
-  get energy() {
-    const timeSinceNap = this.timeSince( 'lastNap' )
-    return 1000 - ( timeSinceNap + this.countPlay * 10 );
+  get isHungry() {
+    return this.hunger > 10;
   }
 
-  set energy( increment ) {
-    this.energy += increment
+  // before calling this action, check there's food
+  eat() {
+    // TODO: Pet.eat(): change pet state to 'eating' and change back to previous state after 5 seconds
+    
+    this.recentMealTimes.unshift( Date.now() )
+
+    // tidy up recentMealTimes array if it's getting too long
+    if( this.recentMealTimes.length > 20 ) {
+      this.recentMealTimes.slice( 0, 20 );
+    }
   }
+
+  // TODO: anxiety level will be a random walk
 
   get petState() {
     if( this.lastNap === null ) {
@@ -65,12 +105,7 @@ export class Pet {
     return 'average'
   }
   
-  speak() {
-    console.log("I am your pet line. You must care for me")
-  }
-  feed() {
-    this.lastMeal = Date.now()
-  }
+  
   sleep() {
     if ( this.lastNap === null ) {
       console.log( 'already sleeping' )
@@ -98,3 +133,5 @@ export class Pet {
   }
 
 }
+
+module.exports = { Pet }
