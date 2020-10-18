@@ -1,32 +1,37 @@
 // Pet object does not deal with pet location or movement
+const { millisToMins, now } = require( './utils/timeUtils.js' )
+const { unmetWantsImpact } = require( './data/unmetWantsImpact.js' )
 
-const timeUntilNapReady = 1000 * 60 * 10;
+const durationFiveMins = 5 * 1000 * 60;
 
-
-
-const millisToMins = ( milliseconds, round = 0 ) => {
-  const mins = milliseconds / ( 1000 * 60 )
-  
-  if( round === 0 ) {
-    return Math.round( mins )
+const getUnmetWantsImpact = ( wants, multipliers ) => {
+  let multiplier = 1;
+  for( let key in wants ){
+    if( wants[ key ] ) {
+      multiplier *= multipliers[ key ]
+    }
   }
-  
-  const rounder = Math.pow( 10, round )
-  
-  return Math.round( mins * rounder ) / rounder
-}
 
+  return multiplier
+}
 
 class Pet {
   constructor() {
     this.state = "newborn"
-    this.lastNap = Date.now()
-    this.lastStateChange = Date.now()
+    this.lastNap = now()
+    this.lastStateChange = now()
+
+    this.moodNum = 50;
+    this.lastMoodUpdate = now()
+    this.unmetWant = { tv: false, tickle: false, food: false, nap: false };
 
     // feeding
-    this.recentMealTimes = Array(12).fill( Date.now() )
+    this.recentMealTimes = Array(12).fill( now() )
     this.hungerLastRecalc = 0;
     this.hungerLev = 0;
+
+    // telly
+    this.timeStartedTv = null;
 
     // console.log("Pet is born")
   }
@@ -36,12 +41,12 @@ class Pet {
   }
 
   get hunger() {
-    if( Date.now() - this.hungerLastRecalc < 5 * 60 * 1000 ) {
+    if( now() - this.hungerLastRecalc < 5 * 60 * 1000 ) {
       return this.hungerLev
     }
 
     const fullnessArr = this.recentMealTimes.map( a => {
-      const minsSince = millisToMins( Date.now() - a )
+      const minsSince = millisToMins( now() - a )
       // effectiveness of recent meals:
       // quantity eaten * fraction that reduces linearly over 4 hours
       return ( ( 4 * 60 ) - minsSince ) / ( 4 * 60 )
@@ -61,7 +66,7 @@ class Pet {
 
     // cache value for quick checking
     this.hungerLev = hunger;
-    this.hungerLastRecalc = Date.now();
+    this.hungerLastRecalc = now();
 
     return ( hunger > 0 ) ? hunger : 0
   }
@@ -73,7 +78,7 @@ class Pet {
   // before calling this action, check there's food
   eat( foodBowl ) {    
     if( foodBowl.foodUnits > 0 ) {
-      this.recentMealTimes.unshift( Date.now() )
+      this.recentMealTimes.unshift( now() )
 
       foodBowl.foodUnits --
   
@@ -87,26 +92,88 @@ class Pet {
     }
   }
 
+ 
+  // pet watching tv: what parts of this does pet object manage? 
+  // bool for currently watching. Timer for total watch time
+  // pet movement is handled elsewhere
+
+
+  // handles want when pet is and is not watching it
+  wantsTv() {
+    // if tired
+    // if it's a certain time
+    // if bored
+    // if binging
+
+    if( this.state === 'watchingTv' ) {
+
+      const tvMillis = now() - this.timeStartedTv;
+      const tvMins = millisToMins( tvMillis )
+
+      return ( tvMins < 5 )
+    } else {
+
+      const randomDesireMultiplier = 0.5 + Math.random();
+      // const boredomMultiplier = ( this.state === 'bored')1.2;
+
+      const time = new Date();
+      const isLate = ( time.getHours() > 17 ) ? 1.5 : 1;
+
+      return randomDesireMultiplier * isLate > 1.2
+    }
+  }
+
+  tryWatchTv( tvObj = {} ) {
+    if( this.state === 'watchingTv' ) return;
+
+    if( !tvObj.available ) {
+      this.unmetWant.tv = true;
+      return;
+    }
+      
+    this.startWatchingTv()
+  }
+  
+  isBinging() {}
+
+  startWatchingTv() {
+    this.state = 'watchingTv'
+    this.timeStartedTv = now();
+  }
+
+  stopWatchingTv() {
+    this.updateState()
+    this.timeStartedTv = null;
+  }
+
   // TODO: anxiety level will be a random walk
 
-  get petState() {
-    if( this.lastNap === null ) {
-      return 'asleep'
-    }
-    if( this.hunger > 30 ) {
-      return 'annoyed'
-    }
-    if( this.energy > 900 ) {
-      return 'alert'
-    } else if( this.energy < 300 ) {
-      return 'tired'
-    }
-    if( this.timeSince( 'lastNap' ) > 20 ) {
-      return 'bored'
-    }
-
-    return 'average'
+  get state() {
+    return this._state;
   }
+
+  set state( newState ) {
+    this._state = newState;
+  }
+
+  updateState() {
+    if( this.state === 'watchingTv' ) {
+      this.state = 'average'
+    }
+  }
+
+  
+  // maybe this is the only place where mood increments are managed. 
+  // but what about one-off incidents, such as TV unavailable?
+      // perhaps use variables like unavailableWantTv
+  // looks at wants and needs
+  // updateMood( ) {
+  //   if( now() - this.lastMoodUpdate < durationFiveMins ) return;
+
+  //   const unmetWants = getUnmetWantsImpact( this.unavailableWant, unmetWantsImpact )
+
+  //   this.moodNum;
+  // }
   
   
   sleep() {
@@ -114,7 +181,7 @@ class Pet {
       console.log( 'already sleeping' )
       return;
     }
-    if (( Date.now() - this.lastNap ) > timeUntilNapReady ) {
+    if (( now() - this.lastNap ) > timeUntilNapReady ) {
       this.lastNap = null;
       console.log( 'starting nap' )
     } else {
@@ -127,11 +194,11 @@ class Pet {
   // }
 
   resetTimeSince( activity ) {
-    this[ activity ] = Date.now()
+    this[ activity ] = now()
   }
 
   timeSince( activity ) {
-    let secondsSinceLast = ( Date.now() - this[ activity ] ) / 6000;
+    let secondsSinceLast = ( now() - this[ activity ] ) / 6000;
     return Math.round(secondsSinceLast * 100) / 100;
   }
 
