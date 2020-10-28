@@ -1,18 +1,27 @@
 // Pet object does not deal with pet location or movement
 const { millisToMins, now } = require( './utils/timeUtils.js' )
-const { unmetWantsImpact } = require( './data/unmetWantsImpact.js' )
+const { wantsImpact } = require( './data/wantsImpact.js' )
 
-const durationFiveMins = 5 * 1000 * 60;
+const durationOneHour = 60 * 1000 * 60;
+const durationOneMins = 1 * 1000 * 60;
 
-const getUnmetWantsImpact = ( wants, multipliers ) => {
-  let multiplier = 1;
+
+// if pet wants something, we want to return negative impact, otw, positive impact
+const getWantsImpact = ( wants, impact ) => {
+  let total = 0;
   for( let key in wants ){
     if( wants[ key ] ) {
-      multiplier *= multipliers[ key ]
+      total -= impact[ key ]
+    } else {
+      total += impact[ key ]
     }
   }
 
-  return multiplier
+  return total
+}
+
+const setWant = ( wants, want, bool ) => {
+  wants[ want ] = bool;
 }
 
 class Pet {
@@ -21,9 +30,9 @@ class Pet {
     this.lastNap = now()
     this.lastStateChange = now()
 
-    this.moodNum = 50;
+    this.moodNum = 100;
     this.lastMoodUpdate = now()
-    this.unmetWant = { tv: false, tickle: false, food: false, nap: false };
+    this.wants = { tv: false, tickle: false, food: false, nap: false };
 
     // feeding
     this.recentMealTimes = Array(12).fill( now() )
@@ -75,12 +84,23 @@ class Pet {
     return this.hunger > 10;
   }
 
+  get isPeckish() {
+    return this.hunger > 7;
+  }
+
   // before calling this action, check there's food
   eat( foodBowl ) {    
+    let wantsFood = true;
     if( foodBowl.foodUnits > 0 ) {
       this.recentMealTimes.unshift( now() )
 
       foodBowl.foodUnits --
+
+      if( !this.isPeckish ) {
+        wantsFood = false
+      }
+
+      this.updateMood( 2, 'food', wantsFood, "just ate. +2" )
   
       // tidy up recentMealTimes array if it's getting too long
       while( this.recentMealTimes.length > 20 ) {
@@ -89,6 +109,8 @@ class Pet {
     } else {
       // if there's no food, shift the latest meal time, because sheer annoyance of pet has ratched up the hunger
       this.recentMealTimes.shift();
+      this.updateMood( -5, 'food', wantsFood, "tried eat. -5" )
+
     }
   }
 
@@ -99,15 +121,15 @@ class Pet {
 
 
   // handles want when pet is and is not watching it
-  wantsTv() {
+  wantsTv( state, timeStartedTv ) {
     // if tired
     // if it's a certain time
     // if bored
     // if binging
 
-    if( this.state === 'watchingTv' ) {
+    if( state === 'watchingTv' ) {
 
-      const tvMillis = now() - this.timeStartedTv;
+      const tvMillis = now() - timeStartedTv;
       const tvMins = millisToMins( tvMillis )
 
       return ( tvMins < 5 )
@@ -123,15 +145,29 @@ class Pet {
     }
   }
 
+  watchTv ( tvObj = { available: true }) {
+    if( this.wantsTv( this.state, this.timeStartedTv ) ) {
+      if( this.state !== 'watchingTv' ) {
+        this.tryWatchTv( tvObj )
+      }
+    } else {
+      // stop watching tv
+      // update mood
+      // update want
+      // change state to walking about
+    }
+
+  }
+
   tryWatchTv( tvObj = {} ) {
-    if( this.state === 'watchingTv' ) return;
 
     if( !tvObj.available ) {
-      this.unmetWant.tv = true;
+      this.updateMood( -2, 'tv', true, 'wants tv. -2')
       return;
     }
       
     this.startWatchingTv()
+    this.updateMood( 1, 'tv', true, 'watching tv. +1')
   }
   
   isBinging() {}
@@ -163,17 +199,27 @@ class Pet {
   }
 
   
-  // maybe this is the only place where mood increments are managed. 
-  // but what about one-off incidents, such as TV unavailable?
-      // perhaps use variables like unavailableWantTv
-  // looks at wants and needs
-  // updateMood( ) {
-  //   if( now() - this.lastMoodUpdate < durationFiveMins ) return;
+  // mood can change as a response to an event. 
+  // It also has a general trajectory that is defined by whether line has enduring met/unmet wants
+  updateMood( increment = null, want = null, bool = null, logging = null ) {
+    if( now() - this.lastMoodUpdate < durationOneMins ) return;
 
-  //   const unmetWants = getUnmetWantsImpact( this.unavailableWant, unmetWantsImpact )
+    // logging for debugging over time ( is one functions calling this lad all the time, etc )
+    if( logging ) {
+      // log string passed in from logging arg, increment, time
+    }
 
-  //   this.moodNum;
-  // }
+    if( increment === null ) {
+
+      const wants = getWantsImpact( this.wants, wantsImpact );
+      this.moodNum += wants;
+
+      return;
+    }
+
+    this.moodNum += increment
+    setWant( this.wants, want, bool )
+  }
   
   
   sleep() {
@@ -181,7 +227,7 @@ class Pet {
       console.log( 'already sleeping' )
       return;
     }
-    if (( now() - this.lastNap ) > timeUntilNapReady ) {
+    if (( now() - this.lastNap ) > durationOneHour ) {
       this.lastNap = null;
       console.log( 'starting nap' )
     } else {

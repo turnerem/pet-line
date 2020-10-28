@@ -14,6 +14,11 @@ for managing movement (x)?
 Some variables are required everywhere: svgDims, pet characteristics, pet loc,
 foodbowl loc, foodbowl dims
 
+28oct20:
+- how do action to watch tv, wantsTv, and other telly stuff fit together? Need one function that is called periodically to check whether line wants tv, whether it's currently watching it, take action accordingly, and update mood
+- pet must choose between things when it has multiple wants. So create a
+  priority function
+- separate out mood from state. State is watchingTv, walking, sleeping, etc
 
 
 bash being helpful:

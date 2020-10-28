@@ -1,6 +1,6 @@
-export const unmetWantsImpact = {
-  tv: 0.9,
-  tickle: 0.95,
-  food: 0.8,
-  nap: 0.85
+export const wantsImpact = {
+  tv: 1,
+  tickle: 0.5,
+  food: 2,
+  nap: 1.5
 }
