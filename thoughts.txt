@@ -25,11 +25,18 @@ foodbowl loc, foodbowl dims
 - refactor eat to be like watchTv - the only function called (exposed) to do
   with eating is eat(), tryEat, etc
 - need a tryEat?
+  - refactor Line.js - pet can only do one thing at a time. Maybe a function
+    that returns pet.actionDecision. This will look at all pet's desires and
+    decide what it's going to do next. This decision function could also
+    control periodicity - all actions are based on decisions, and each new
+    decision happens every x mins, where x is shorter if the decision is
+    whether or not to have another bite, but longer if it's watching telly
 - add functionality for tickle to pet obj
 - check all action functions are only being called periodically.
 - capture data on moodNum increments, logging, etc and figure out a way to
   visualise. Based on general shape, decide where cutoff points sould be for
   different moods, etc.
+- when calculating angle, just calculate once when state changes
 
 
 
