@@ -24,9 +24,26 @@ const setWant = ( wants, want, bool ) => {
   wants[ want ] = bool;
 }
 
+const calcMood = ( moodNum ) => {
+  const multiplier = 1;
+  if( moodNum > 150 * multiplier ) {
+    return 'ecstatic'
+  } else if( moodNum > 80 * multiplier ) {
+    return 'happy'
+  } else if( moodNum > 50 * multiplier ) {
+    return 'bored'
+  } else if( moodNum > 40 * multiplier ) {
+    return 'restless'
+  } else if( moodNum > 30 * multiplier ) {
+    return 'annoyed'
+  } else {
+    return 'angry'
+  }
+}
+
 class Pet {
   constructor() {
-    this.state = "newborn"
+    this.state = "average"
     this.lastNap = now()
     this.lastStateChange = now()
 
@@ -100,7 +117,8 @@ class Pet {
         wantsFood = false
       }
 
-      this.updateMood( 2, 'food', wantsFood, "just ate. +2" )
+      this.updateMoodNum( 2, "just ate. +2" )
+      setWant( 'food', wantsFood )
   
       // tidy up recentMealTimes array if it's getting too long
       while( this.recentMealTimes.length > 20 ) {
@@ -109,7 +127,8 @@ class Pet {
     } else {
       // if there's no food, shift the latest meal time, because sheer annoyance of pet has ratched up the hunger
       this.recentMealTimes.shift();
-      this.updateMood( -5, 'food', wantsFood, "tried eat. -5" )
+      this.updateMoodNum( -5, "tried eat. -5" )
+      setWant( 'food', wantsFood )
 
     }
   }
@@ -147,14 +166,15 @@ class Pet {
 
   watchTv ( tvObj = { available: true }) {
     if( this.wantsTv( this.state, this.timeStartedTv ) ) {
+      setWant( this.wants, 'tv', true )
       if( this.state !== 'watchingTv' ) {
         this.tryWatchTv( tvObj )
       }
     } else {
-      // stop watching tv
-      // update mood
-      // update want
-      // change state to walking about
+      setWant( this.wants, 'tv', false )
+      if( this.state === 'watchingTv' ) {
+        this.stopWatchingTv()
+      }
     }
 
   }
@@ -162,12 +182,12 @@ class Pet {
   tryWatchTv( tvObj = {} ) {
 
     if( !tvObj.available ) {
-      this.updateMood( -2, 'tv', true, 'wants tv. -2')
+      this.updateMoodNum( -2, 'wants tv. -2')
       return;
     }
       
     this.startWatchingTv()
-    this.updateMood( 1, 'tv', true, 'watching tv. +1')
+    this.updateMoodNum( 1, 'watching tv. +1')
   }
   
   isBinging() {}
@@ -198,10 +218,14 @@ class Pet {
     }
   }
 
+
+  get mood() {
+    return calcMood();
+  }
   
   // mood can change as a response to an event. 
   // It also has a general trajectory that is defined by whether line has enduring met/unmet wants
-  updateMood( increment = null, want = null, bool = null, logging = null ) {
+  updateMoodNum( increment = null, logging = null ) {
     if( now() - this.lastMoodUpdate < durationOneMins ) return;
 
     // logging for debugging over time ( is one functions calling this lad all the time, etc )
@@ -218,7 +242,6 @@ class Pet {
     }
 
     this.moodNum += increment
-    setWant( this.wants, want, bool )
   }
   
   

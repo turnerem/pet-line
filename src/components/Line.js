@@ -1,5 +1,6 @@
 import React, {useState, useEffect, useRef} from 'react';
-import { petState } from '../data/petState';
+import { petStateData } from '../data/petStateData';
+import { petMoodData } from '../data/petMoodData';
 import { calcHeadLoc, calcRect } from '../utils/mathUtils'
 import { Pet } from '../petObj'
 import gsap from 'gsap';
@@ -7,40 +8,9 @@ import { moveToFood, eat, takeUnrealStep } from '../utils/petActions';
 
 const pet = new Pet();
 
-
-// function useMovement ( initialDistance, x, svgWidth ) {
-
-//   let aStep = gsap.timeline();
-
-
-//   const [ distance, setDistance ] = useState( initialDistance );
-
-//   const duration = 1;
-
-//   const nextMove = calcNextMove( distance, x, svgWidth )
-
-//   setDistance( nextMove )
-
-
-//   aStep.to("#pet-line", { duration: duration, x: distance})
-
-//   aStep.repeat(false, false);
-
-//   console.log(aStep)
-
-//   // useEffect(() => {
-//   //   takeStep( duration, distance )
-//   //   // const moveId = setInterval(() => {
-//   //   // }, 1100 * duration);
-
-//   //   // return () => clearInterval( moveId )
-//   // })
-
-// }
-
 // how to change coordinates when mood changes, 
 // and also periodically trigger footsteps?
-const useCoordinatesManager = ( svgDims, foodUnits, setFoodUnits, initialPetState = petState[pet.petState] ) => {
+const useCoordinatesManager = ( svgDims, foodUnits, setFoodUnits, initialPetState = petStateData[pet.state] ) => {
 
   const [ stepMvmt, setStepMvmt ] = useState(svgDims.width * .1)
         
@@ -80,11 +50,8 @@ const useCoordinatesManager = ( svgDims, foodUnits, setFoodUnits, initialPetStat
               // if already at bowl, then eat
   
               if (eat(foodUnits, setFoodUnits)) {
-                pet.incrementHunger(-1)
                 pet.resetTimeSince( 'lastMeal' )
                 // pet.
-              } else {
-                pet.incrementHunger(8)
               }
             }
           } else {
@@ -147,7 +114,7 @@ const Line = ({ svgDims, foodUnits, setFoodUnits }) => {
 
   // const petRef = useRef(null)
 
-  const { shade } = petState[pet.petState];
+  const { shade } = petMoodData[pet.mood];
 
   let tl = undefined;
 
