@@ -62,6 +62,15 @@ class Pet {
     // console.log("Pet is born")
   }
 
+  actionDecision( wants ) {
+    // check for current active wants
+      // prioritise among these wants
+      // need to compare integer metrics for want food/tv/tickle/sleep
+      // regularise each integer value so that we can just choose the largest value in this function
+    
+    // if nothing wanted, stay in current state, current mood, basically don't update anything
+  }
+
   set hunger( hungerLevel ) {
     this.hungerLev = hungerLevel
   }

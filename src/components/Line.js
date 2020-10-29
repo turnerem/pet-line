@@ -44,15 +44,11 @@ const useCoordinatesManager = ( svgDims, foodUnits, setFoodUnits, initialPetStat
       const moveId = setInterval(() => {
         // improve these line with a boolean that says whether moveToFood is required - so moveToFood is not calculated each time here.
         if( !petting ) {
-          if (pet.hunger > 3 ) {
+          if ( pet.isHungry ) {
             console.log('hungry now')
             if( !moveToFood( xCoords, setXCoords, 400, 90 ) ){
               // if already at bowl, then eat
-  
-              if (eat(foodUnits, setFoodUnits)) {
-                pet.resetTimeSince( 'lastMeal' )
-                // pet.
-              }
+              eat(foodUnits, setFoodUnits)
             }
           } else {
             if( redirectNextMove( stepMvmt, xCoords.x2, svgDims.width ) ){
@@ -61,7 +57,7 @@ const useCoordinatesManager = ( svgDims, foodUnits, setFoodUnits, initialPetStat
             takeUnrealStep( stepMvmt, xCoords, setXCoords )
           }
         } else {
-          console.log( 'petting! ')
+          console.log( 'petting!' )
         }
     }, 1800 * (1 + 3 * Math.random() ) );
 
