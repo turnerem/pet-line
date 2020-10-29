@@ -4,7 +4,7 @@
 // colour is mood driven
 // states affect angle, isWalking
 
-export const petMood = {
+export const petMoodData = {
   ecstatic: {
     shade: "#F0FF36"
   }, 
