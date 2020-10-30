@@ -31,4 +31,14 @@ export const petStateData = {
     feetLocX: 300,
     leanDir: 'left'
   },
+  wakingUp: {
+    slope: -0.9,
+    feetLocX: 300,
+    leanDir: 'left'
+  },
+  watchingTv: {
+    slope: -1.5,
+    feetLocX: 200,
+    leanDir: 'left'
+  }
 }

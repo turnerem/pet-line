@@ -59,6 +59,9 @@ class Pet {
     // telly
     this.timeStartedTv = null;
 
+    // sleeping
+    this.energy = 100;
+
     // console.log("Pet is born")
   }
 
@@ -149,15 +152,18 @@ class Pet {
 
 
   // handles want when pet is and is not watching it
-  wantsTv( state, timeStartedTv ) {
+  // TODO: use this.state instead of passing arg into function - for all args.
+    // because: this will be called in Line.js and we don't want to be passing in any args from there
+    // actually, will probably be called in actionDecision
+  wantsTv() {
     // if tired
     // if it's a certain time
     // if bored
     // if binging
 
-    if( state === 'watchingTv' ) {
+    if( this.state === 'watchingTv' ) {
 
-      const tvMillis = now() - timeStartedTv;
+      const tvMillis = now() - this.timeStartedTv;
       const tvMins = millisToMins( tvMillis )
 
       return ( tvMins < 5 )
@@ -174,7 +180,7 @@ class Pet {
   }
 
   watchTv ( tvObj = { available: true }) {
-    if( this.wantsTv( this.state, this.timeStartedTv ) ) {
+    if( this.wantsTv() ) {
       setWant( this.wants, 'tv', true )
       if( this.state !== 'watchingTv' ) {
         this.tryWatchTv( tvObj )
@@ -253,17 +259,87 @@ class Pet {
     this.moodNum += increment
   }
   
-  
-  sleep() {
-    if ( this.lastNap === null ) {
-      console.log( 'already sleeping' )
+  // this function should be called every time the component updates
+  updateEnergy() {
+    switch( this.state ) {
+      case 'sleeping':
+        this.energy += 10
+        break;
+      case 'wakingUp':
+        this.energy += 3;
+        break;
+      case 'watchingTv':
+        this.energy -= 1;
+        break;
+      case 'tired':
+        this.energy -= 6;
+        break;
+      default:
+        this.energy -= 2;
+        break;
+    }
+  }
+
+  get energy() {
+    return this._energy
+  }
+
+  set energy( newEnergy ) {
+    this._energy = newEnergy;
+  }
+
+  wantsNap() {
+    if( this.energy < 100 ) {
+      return true;
+    }
+    if( this.state === 'sleeping' && this.energy < 300 ) {
+      return true;
+    }
+    return false;
+  }
+
+  tryNap( tvObj ) {
+    // if telly on, can't nap
+    if( !tvObj.isOn ) {
+      this.startNap()
+      this.updateMoodNum( 2, 'started napping' )
+    } else {
+      this.updateMoodNum( -3, 'telly preventing napping')
+    }
+  }
+
+  startNap() {
+    this.state = 'sleeping'
+  }
+
+  // eventually, will transition through waking-up phase. But not right now
+  stopNap() {
+    if( this.energy > 500 ) {
+      this.state = 'alert'
+    } else if( this.energy > 300 ) {
+      this.state = 'average'
+    } else {
+      this.state = 'tired'
+    }
+  }
+
+
+  // this.wants is only checked when updating mood. It's only set in action functions like the folllowing 'nap'
+  nap( tvObj = { isOn: false } ) {
+    if ( this.state === 'sleeping' ) {
+      if( !this.wantsNap() ) {
+        setWant( this.wants, 'nap', false )
+        this.stopNap()
+      } else if( tvObj.isOn ) {
+        this.updateMoodNum( -10, 'woken up by tv' )
+        this.stopNap()
+      }
       return;
     }
-    if (( now() - this.lastNap ) > durationOneHour ) {
-      this.lastNap = null;
-      console.log( 'starting nap' )
-    } else {
-      console.log( 'not tired!' )
+
+    if( this.wantsNap() ) {
+      setWant( this.wants, 'nap', true )
+      this.tryNap( tvObj )
     }
   }
 
