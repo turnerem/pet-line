@@ -62,6 +62,9 @@ class Pet {
     // sleeping
     this.energy = 100;
 
+    // anxiety
+    this.anxiety = 0;
+
     // console.log("Pet is born")
   }
 
@@ -155,6 +158,7 @@ class Pet {
   // TODO: use this.state instead of passing arg into function - for all args.
     // because: this will be called in Line.js and we don't want to be passing in any args from there
     // actually, will probably be called in actionDecision
+  // how will this function be called? It's got a random element to it, so should really not be called repeatedly. Or change random part to bingeyMood
   wantsTv() {
     // if tired
     // if it's a certain time
@@ -205,7 +209,12 @@ class Pet {
     this.updateMoodNum( 1, 'watching tv. +1')
   }
   
-  isBinging() {}
+  // this will store a value on state that will only get updated every X hours
+  // this will interact with anxiety levels
+  bingeyMood() {
+    // depends on number of recent binges
+    // also anxiety
+  }
 
   startWatchingTv() {
     this.state = 'watchingTv'
@@ -218,6 +227,17 @@ class Pet {
   }
 
   // TODO: anxiety level will be a random walk
+  get anxiety() {
+    return this._anxiety
+  }
+
+  set anxiety( newAnxiety ) {
+    this._anxiety = newAnxiety
+  }
+
+  updateAnxiety() {
+    this.anxiety += ( Math.random > 0.5 ) ? 1 : -1
+  }
 
   get state() {
     return this._state;
