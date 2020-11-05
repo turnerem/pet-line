@@ -22,8 +22,7 @@ foodbowl loc, foodbowl dims
 
 
 29oct20:
-- refactor eat to be like watchTv - the only function called (exposed) to do
-  with eating is eat(), tryEat, etc
+- DONE: refactor eat to be like watchTv - the only function called (exposed) to do with eating is eat(), tryEat, etc
 - need a tryEat?
   - refactor Line.js - pet can only do one thing at a time. Maybe a function
     that returns pet.actionDecision. This will look at all pet's desires and
@@ -31,6 +30,19 @@ foodbowl loc, foodbowl dims
     control periodicity - all actions are based on decisions, and each new
     decision happens every x mins, where x is shorter if the decision is
     whether or not to have another bite, but longer if it's watching telly
+  - if pet balanced its wants in actionDecision, may need to remove the want
+    checks from the action functions, e.g. watchTv currently calls wantsTv
+  - Apart from pet decisions, the owner can intervene, and this function
+    should also evaluate pet wants
+  - All wants should be between 0 and 1
+  - Basic idea is that (aside from owner intervention), pet line is always
+    acting based on what it WANTS.
+      - wants for individual activities are updated
+      - competing wants are balanced and ultimateWant is derived
+      - action taken based on ultimateWant, if not already doing ultimateWant
+      - if not able to take that action (e.g. TV not available, but
+	ultimateWant === 'tv'), loop effort to watch tv and update mood
+	accordingly
 - add functionality for tickle to pet obj
 - check all action functions are only being called periodically.
 - capture data on moodNum increments, logging, etc and figure out a way to
@@ -38,42 +50,5 @@ foodbowl loc, foodbowl dims
   different moods, etc.
 - when calculating angle, just calculate once when state changes
 
-
-
-bash being helpful:
-Don't try to install it manually: your package manager does it automatically.
-However, a different version of babel-jest was detected higher up in the tree:
-
-  /Users/emilyturner/Documents/SideHustlin/pet-line/node_modules/babel-jest (version: 26.5.2)
-
-Manually installing incompatible versions is known to cause hard-to-debug issues.
-
-If you would prefer to ignore this check, add SKIP_PREFLIGHT_CHECK=true to an .env file in your project.
-That will permanently disable this message but you might encounter other issues.
-
-To fix the dependency tree, try following the steps below in the exact order:
-
-  1. Delete package-lock.json (not package.json!) and/or yarn.lock in your project folder.
-  2. Delete node_modules in your project folder.
-  3. Remove "babel-jest" from dependencies and/or devDependencies in the package.json file in your project folder.
-  4. Run npm install or yarn, depending on the package manager you use.
-
-In most cases, this should be enough to fix the problem.
-If this has not helped, there are a few other things you can try:
-
-  5. If you used npm, install yarn (http://yarnpkg.com/) and repeat the above steps with it instead.
-     This may help because npm has known issues with package hoisting which may get resolved in future versions.
-
-  6. Check if /Users/emilyturner/Documents/SideHustlin/pet-line/node_modules/babel-jest is outside your project directory.
-     For example, you might have accidentally installed something in your home folder.
-
-  7. Try running npm ls babel-jest in your project folder.
-     This will tell you which other package (apart from the expected react-scripts) installed babel-jest.
-
-If nothing else helps, add SKIP_PREFLIGHT_CHECK=true to an .env file in your project.
-That would permanently disable this preflight check in case you want to proceed anyway.
-
-P.S. We know this message is long but please read the steps above :-) We hope you find them helpful!
-
-Waiting for the debugger to disconnect...
-Waiting for the debugger to disconnect...
+NEXT: refactor each want calc to return number between 0 and 1. Then write
+actionDecision to look at these wants and make decision.

@@ -40,5 +40,10 @@ export const petStateData = {
     slope: -1.5,
     feetLocX: 200,
     leanDir: 'left'
+  },
+  changeover: {
+    slope: 50, 
+    feetLocx: 190,
+    leanDir: 'left'
   }
 }
