@@ -2,8 +2,8 @@
 const { millisToMins, now } = require( './utils/timeUtils.js' )
 const { wantsImpact } = require( './data/wantsImpact.js' )
 
-const durationOneHour = 60 * 1000 * 60;
-const durationOneMins = 1 * 1000 * 60;
+const durationOneHour = 3600000;
+const durationOneMins = 60000;
 
 
 // if pet wants something, we want to return negative impact, otw, positive impact
@@ -57,13 +57,13 @@ class Pet {
     this.hungerLev = 0;
 
     // telly
-    this.timeStartedTv = null;
+    this.tvWant = 1;
 
     // sleeping
     this.energy = 100;
 
     // anxiety
-    this.anxiety = 0;
+    this.anxiety = 20;
 
     // console.log("Pet is born")
   }
@@ -154,37 +154,33 @@ class Pet {
   // pet movement is handled elsewhere
 
 
+  set tvWant( want ) {
+    this._tvWant = want
+  }
+
+  get tvWant() {
+    return this._tvWant
+  }
   // handles want when pet is and is not watching it
   // TODO: use this.state instead of passing arg into function - for all args.
     // because: this will be called in Line.js and we don't want to be passing in any args from there
     // actually, will probably be called in actionDecision
   // how will this function be called? It's got a random element to it, so should really not be called repeatedly. Or change random part to bingeyMood
   wantsTv() {
-    // if tired
-    // if it's a certain time
-    // if bored
-    // if binging
+    const time = new Date();
+    const isLate = ( time.getHours() > 17 ) ? 1.5 : 0.6;
+
+    let want = this.bingeFactor() * isLate
 
     if( this.state === 'watchingTv' ) {
+      want *= ( this.bingeFactor > 1 ) ? 1 : 0.7
+    } 
 
-      const tvMillis = now() - this.timeStartedTv;
-      const tvMins = millisToMins( tvMillis )
-
-      return ( tvMins < 5 )
-    } else {
-
-      const randomDesireMultiplier = 0.5 + Math.random();
-      // const boredomMultiplier = ( this.state === 'bored')1.2;
-
-      const time = new Date();
-      const isLate = ( time.getHours() > 17 ) ? 1.5 : 1;
-
-      return randomDesireMultiplier * isLate > 1.2
-    }
+    return want;
   }
 
   watchTv ( tvObj = { available: true }) {
-    if( this.wantsTv() ) {
+    if( this.wantsTv() > 1.4 ) {
       setWant( this.wants, 'tv', true )
       if( this.state !== 'watchingTv' ) {
         this.tryWatchTv( tvObj )
@@ -209,11 +205,19 @@ class Pet {
     this.updateMoodNum( 1, 'watching tv. +1')
   }
   
-  // this will store a value on state that will only get updated every X hours
-  // this will interact with anxiety levels
-  bingeyMood() {
-    // depends on number of recent binges
-    // also anxiety
+
+  bingeFactor() {
+    const anxFactor = this.anxiety / 20;
+
+    if( anxFactor > 2 ) {
+      return 2
+    } 
+
+    if( anxFactor < 0.1 ) {
+      return 0.1
+    }
+
+    return anxFactor
   }
 
   startWatchingTv() {
