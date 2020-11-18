@@ -13,3 +13,7 @@ export const millisToMins = ( milliseconds, round = 0 ) => {
 export const now = () => {
   return Date.now()
 }
+
+export const waitRecalcWant = 2 * 60 * 1000
+
+export const durFourHours = 4 * 60 * 60 * 1000

@@ -16,6 +16,11 @@ export const petStateData = {
     feetLocX: 190,
     leanDir: 'left'
   },
+  eating: {
+    slope: -9,
+    feetLocX: 190,
+    leanDir: 'left'
+  },
   alert: {
     slope: -100,
     feetLocX: 190,

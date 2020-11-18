@@ -36,7 +36,7 @@ foodbowl loc, foodbowl dims
     should also evaluate pet wants
   - All wants should be between 0 and 1
   - Basic idea is that (aside from owner intervention), pet line is always
-    acting based on what it WANTS. 
+    acting based on what it WANTS.
       - wants for individual activities are updated
       - competing wants are balanced and ultimateWant is derived
       - action taken based on ultimateWant, if not already doing ultimateWant

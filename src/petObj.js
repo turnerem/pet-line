@@ -82,7 +82,7 @@ class Pet {
   }
 
   get hunger() {
-    if( now() - this.hungerLastRecalc < 5 * 60 * 1000 ) {
+    if( now() - this.hungerLastRecalc < 300000 ) {
       return this.hungerLev
     }
 
@@ -312,15 +312,15 @@ class Pet {
     this._energy = newEnergy;
   }
 
-  wantsNap() {
-    if( this.energy < 100 ) {
-      return true;
-    }
-    if( this.state === 'sleeping' && this.energy < 300 ) {
-      return true;
-    }
-    return false;
-  }
+  // wantsNap() {
+  //   if( this.energy < 100 ) {
+  //     return true;
+  //   }
+  //   if( this.state === 'sleeping' && this.energy < 300 ) {
+  //     return true;
+  //   }
+  //   return false;
+  // }
 
   tryNap( tvObj ) {
     // if telly on, can't nap
@@ -348,24 +348,24 @@ class Pet {
   }
 
 
-  // this.wants is only checked when updating mood. It's only set in action functions like the folllowing 'nap'
-  nap( tvObj = { isOn: false } ) {
-    if ( this.state === 'sleeping' ) {
-      if( !this.wantsNap() ) {
-        setWant( this.wants, 'nap', false )
-        this.stopNap()
-      } else if( tvObj.isOn ) {
-        this.updateMoodNum( -10, 'woken up by tv' )
-        this.stopNap()
-      }
-      return;
-    }
+  // // this.wants is only checked when updating mood. It's only set in action functions like the folllowing 'nap'
+  // nap( tvObj = { isOn: false } ) {
+  //   if ( this.state === 'sleeping' ) {
+  //     if( !this.wantsNap() ) {
+  //       setWant( this.wants, 'nap', false )
+  //       this.stopNap()
+  //     } else if( tvObj.isOn ) {
+  //       this.updateMoodNum( -10, 'woken up by tv' )
+  //       this.stopNap()
+  //     }
+  //     return;
+  //   }
 
-    if( this.wantsNap() ) {
-      setWant( this.wants, 'nap', true )
-      this.tryNap( tvObj )
-    }
-  }
+  //   if( this.wantsNap() ) {
+  //     setWant( this.wants, 'nap', true )
+  //     this.tryNap( tvObj )
+  //   }
+  // }
 
   // checkPet(){
   //   return this.petState
