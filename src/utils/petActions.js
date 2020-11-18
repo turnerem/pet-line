@@ -19,9 +19,10 @@ export const moveToFood = (xCoords, setXCoords, foodBowlLocX, foodBowlWidth ) =>
     const destination = Math.random() * foodBowlWidth + foodBowlLocX
 
     setXCoords({ x1: destination - xCoords.x2 + xCoords.x1, x2: destination })
-
+    return true;
     // timeline.to("#pet-line", { duration: 1, x: destination - currentLocX })
   }
+  return false;
 }
 
 export const takeUnrealStep = (stepMvmt, xCoords, setXCoords) => {

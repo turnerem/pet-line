@@ -2,7 +2,7 @@ import React, {useState, useEffect, useRef} from 'react';
 import { petStateData } from '../data/petStateData';
 import { petMoodData } from '../data/petMoodData';
 import { calcHeadLoc, calcRect } from '../utils/mathUtils'
-import { Pet } from '../petObj'
+import { Pet } from '../petObjRefactored'
 import gsap from 'gsap';
 import { moveToFood, eat, takeUnrealStep } from '../utils/petActions';
 
@@ -34,32 +34,27 @@ const useCoordinatesManager = ( svgDims, foodUnits, setFoodUnits, initialPetStat
   
   const rectCoords = calcRect( xCoords, yCoords )
 
-
-//   pet state alert hunger: 9.11
-// petObj.js:22 Uncaught TypeError: Cannot set property hunger of #<Pet> which has only a getter
-//     at Pet.incrementHunger (petObj.js:22)
-//     at Line.js:72
-
     useEffect(() => {
       const moveId = setInterval(() => {
-        // improve these line with a boolean that says whether moveToFood is required - so moveToFood is not calculated each time here.
+        const ultimateWant = pet.getUltimateWant();
+
         if( !petting ) {
-          if ( pet.isHungry ) {
-            console.log('hungry now')
-            if( !moveToFood( xCoords, setXCoords, 400, 90 ) ){
-              // if already at bowl, then eat
-              eat(foodUnits, setFoodUnits)
-            }
+          if( (ultimateWant !== 'food' ) || 
+              (ultimateWant === 'food' & !moveToFood( xCoords, setXCoords, 400, 90 ) ) ) {
+              
+            pet.takeAction( ultimateWant, { foodUnits, setFoodUnits })
           } else {
             if( redirectNextMove( stepMvmt, xCoords.x2, svgDims.width ) ){
               setStepMvmt( stepMvmt * -1 )
             }
             takeUnrealStep( stepMvmt, xCoords, setXCoords )
+
           }
         } else {
           console.log( 'petting!' )
         }
-    }, 1800 * (1 + 3 * Math.random() ) );
+        pet.updateMetrics();
+    }, 2500 );
 
     return () => clearInterval( moveId );
 

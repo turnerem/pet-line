@@ -1,11 +1,4 @@
-TODO, ordered by nextness
-- put line on rect. Make rect move and add filter to it. Flip slop of line
-  when direction changes
-- add buttons to increase/decreasae hunger, energy, etc. For testing.
-- think of mood updater given owner action. This could be a switch on owner
-  action. This is probably preferable: having all owner-influenced mood
-  updating in just one function
-  - ditto for mood updating given want X
+TODO
 
 how to manage the coordinates of the line? Coordinates are needed to
 initialise line loc. Then x is updated based on movement. Need a custom hook
@@ -50,5 +43,6 @@ foodbowl loc, foodbowl dims
   different moods, etc.
 - when calculating angle, just calculate once when state changes
 
-NEXT: refactor each want calc to return number between 0 and 1. Then write
-actionDecision to look at these wants and make decision.
+- refactor how movement updating works with actions. Reorder useEffect to
+  check for action changes and possible required movement updates based on
+  changes / current state.

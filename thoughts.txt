@@ -43,5 +43,8 @@ foodbowl loc, foodbowl dims
   different moods, etc.
 - when calculating angle, just calculate once when state changes
 
-NEXT: refactor each want calc to return number between 0 and 1. Then write
-actionDecision to look at these wants and make decision.
+- refactor how movement updating works with actions. Reorder useEffect to
+  check for action changes and possible required movement updates based on
+  changes / current state.
+- create functionality in Line for updating coordinates given action, and
+  maybe call this once instead of lots of highly action-particular faff in useEffect

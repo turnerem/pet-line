@@ -60,6 +60,7 @@ class Pet {
     this.recentMealTimes = Array(12).fill( now() );
     this.hungerLastRecalc = 0;
     this.hungerLev = 0;
+    this.isAtFoodBowl = false;
   }
 
 
@@ -251,12 +252,21 @@ class Pet {
     this.state = 'eating'
   }
 
+  get isAtFoodBowl() {
+    return this._isAtFoodBowl
+  }
+
+  set isAtFoodBowl( bool ) {
+    this._isAtFoodBowl = bool;
+  }
+
   // before calling this action, check there's food
-  tryEat( foodBowl ) {    
-    if( foodBowl.foodUnits > 0 ) {
+  tryEat( foodBowl ) {  
+    const { foodUnits, setFoodUnits } = foodBowl;  
+    if( foodUnits > 0 ) {
       this.startEating()
 
-      foodBowl.foodUnits --
+      setFoodUnits( foodUnits - 1 )
       this.recentMealTimes.unshift( now() )
 
       this.updateMoodNum( 2, "just ate. +2" )
